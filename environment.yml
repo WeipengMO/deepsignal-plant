@@ -16,6 +16,5 @@ dependencies:
   - pandas
   - samtools>=1.12  # will install dependence->htslib, which includes tabix and bgzip
   - minimap2>=2.23
-  - deepsignal-plant=0.1.6
   - pip:
     - ont-tombo==1.5.1  # using conda to install tombo causes conflicts?

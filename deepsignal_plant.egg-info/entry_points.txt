@@ -1,0 +1,2 @@
+[console_scripts]
+deepsignal_plant = deepsignal_plant.deepsignal_plant:main

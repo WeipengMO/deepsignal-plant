@@ -1,6 +1,6 @@
 import os
 import argparse
-
+import gzip
 
 basepairs = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N',
              'W': 'W', 'S': 'S', 'M': 'K', 'K': 'M', 'R': 'Y',
@@ -119,6 +119,8 @@ def _split_freq_file(freqfile, ref):
             wfobjs.append(open(fname.rstrip(".freq") + "." + motifstr + ".freq" + fext, "w"))
         elif fname.endswith(".frequency"):
             wfobjs.append(open(fname.rstrip(".frequency") + "." + motifstr + ".frequency" + fext, "w"))
+        elif freqfile.endswith(".gz"):
+            wfobjs.append(gzip.open(freqfile.rstrip(".tsv.gz") + "." + motifstr + '.tsv.gz', "wt"))
         else:
             wfobjs.append(open(fname + "." + motifstr + fext, "w"))
 
@@ -146,18 +148,23 @@ def _split_freq_file(freqfile, ref):
         # chrom, pos, sitestats._strand, sitestats._pos_in_strand, sitestats._prob_0,
         # sitestats._prob_1, sitestats._met, sitestats._unmet, sitestats._coverage, rmet,
         # sitestats._kmer
-        with open(freqfile, "r") as rf:
-            for line in rf:
-                count += 1
-                words = line.strip().split("\t")
-                kmer = words[-1]
-                cenpos = len(kmer)//2
-                seq = kmer[cenpos:(cenpos+3)]
-                try:
-                    wfobjs[motif2idx[seq2motif[seq]]].write(line)
-                except KeyError:
-                    count_fail += 1
-                    print("seq: {}, line: {}".format(seq, line.strip()))
+        if freqfile.endswith('gz'):
+            rf = gzip.open(freqfile, "rt")
+        else:
+            rf = open(freqfile, "r")
+
+        for line in rf:
+            count += 1
+            words = line.strip().split("\t")
+            kmer = words[-1]
+            cenpos = len(kmer)//2
+            seq = kmer[cenpos:(cenpos+3)]
+            try:
+                wfobjs[motif2idx[seq2motif[seq]]].write(line)
+            except KeyError:
+                count_fail += 1
+                print("seq: {}, line: {}".format(seq, line.strip()))
+        rf.close()
 
     for wf in wfobjs:
         wf.flush()
